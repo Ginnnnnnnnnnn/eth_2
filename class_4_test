@@ -1,0 +1,44 @@
+const YtokenERC20 = artifacts.require("YtokenERC20");
+
+contract("YtokenERC20",accounts => {
+    it("Ytoken", async()=>{
+        const instance = await YtokenERC20.deployed();
+        const feeBeneficiary = await instance.feeBeneficiary.call();
+        assert.equal(feeBeneficiary,"0x25D0B218c578f2e3aA715A073839413eA4755546");
+
+
+        const account_zero_balance = await instance.balanceOf.call(accounts[0]);
+        console.log(`constructor msg.sender balance :${account_zero_balance}`)
+        assert.equal(account_zero_balance, 1000000000 * 10 ** 18)
+
+
+        let m_receiver = accounts[1];
+        let m_amount = 1000000000;
+
+        await instance.mint(m_receiver, m_amount);
+        const account_one_balance = await instance.balanceOf.call(accounts[1]);
+        assert.equal(account_one_balance, m_amount);
+
+        let b_amount = 100000000;
+
+        await instance.burn(b_amount)
+        const account_zero_balance2 = await instance.balanceOf.call(accounts[0]);
+        assert.equal(account_zero_balance2, 1000000000 * 10 ** 18 - b_amount);
+
+        let account_to = accounts[2];
+        let t_amount = 100000000;
+        await instance.transfer(account_to,t_amount)
+        const account_two_balance = await instance.balanceOf.call(accounts[2]);
+        const fb_balance = await instance.balanceOf.call(feeBeneficiary)
+        console.log(`account_two_balance :${account_two_balance}`)
+        console.log(`fb_balance :${fb_balance}`)
+        assert.equal(account_two_balance, t_amount-10000000);
+        assert.equal(fb_balance, 5000000);
+
+
+
+
+    })
+})
+
+
